@@ -37,20 +37,32 @@ export async function getUserById(
 }
 
 // ─── POST /api/users ──────────────────────────────────────────────────────────
-export async function createUser(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const { name, email } = req.body as { name: string; email: string };
-    if (!name || !email) throw new AppError('Name and email are required', 400);
+// export async function createUser(
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): Promise<void> {
+//   try {
+//     const { name, email } = req.body as { name: string; email: string };
+//     if (!name || !email) throw new AppError('Name and email are required', 400);
 
-    const user = await userService.createUser({ name, email });
-    sendSuccess(res, user, 'User created successfully', 201);
-  } catch (error) {
-    next(error);
-  }
+//     const user = await userService.createUser({ name, email });
+//     sendSuccess(res, user, 'User created successfully', 201);
+//   } catch (error) {
+//     next(error);
+//   }
+// }
+
+export async function createUser(req:Request ,res:Response,next:NextFunction):Promise<void> 
+{
+try{
+  const {firstName,lastName,userName} = req.body as {firstName:string,lastName:string,userName:string};
+if(!firstName || !lastName   || !userName) throw new AppError('All fields are required',400);
+const user=  await userService.createUser ({firstName,lastName,userName})
+sendSuccess(res, user, 'User created successfully', 201);
+}catch(error){
+  next(error);
+}
 }
 
 // ─── PUT /api/users/:id ───────────────────────────────────────────────────────

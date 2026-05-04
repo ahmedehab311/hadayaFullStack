@@ -3,12 +3,14 @@ import { User, Prisma } from '@prisma/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type CreateUserInput = {
-  name: string;
-  email: string;
+firstName: string;
+lastName: string;
+userName: string;
 };
 
 export type UpdateUserInput = {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
 };
 
