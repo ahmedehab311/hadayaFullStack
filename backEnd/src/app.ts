@@ -3,6 +3,7 @@ import cors from 'cors';
 import { errorHandler } from './middlewares/errorHandler';
 import userRoutes from './routes/user.routes';
 import { notFound } from './middlewares/notFound';
+import authRoutes from './routes/authRoutes';
 
 const app: Application = express();
 // 
@@ -29,6 +30,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
 // ─── Error Handling ───────────────────────────────────────────────────────────
 app.use(notFound);

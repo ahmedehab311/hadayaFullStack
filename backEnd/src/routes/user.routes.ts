@@ -19,7 +19,7 @@ router.get('/:id', getUserById);
 router.post('/', createUser);
 
 // PUT  /api/users/:id    → update user
-router.put('/:id', updateUser);
+router.patch('/:id', updateUser);
 
 // DELETE /api/users/:id  → delete user
 router.delete('/:id', deleteUser);

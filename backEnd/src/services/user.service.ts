@@ -1,52 +1,42 @@
 import prisma from '../config/prismaClient';
 import { User, Prisma } from '@prisma/client';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import bcrypt from 'bcrypt';
+import { AppError } from '../utils/AppError';
 export type CreateUserInput = {
-firstName: string;
-lastName: string;
-userName: string;
+email: string;
+password: string;
+name: string;
 };
 
 export type UpdateUserInput = {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
+email?: string;
+password?: string;
+name?: string;  
 };
 
-// ─── Service Methods ──────────────────────────────────────────────────────────
-
-/**
- * Retrieve all users from the database.
- */
 export async function findAllUsers(): Promise<User[]> {
   return prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
   });
 }
 
-/**
- * Find a single user by their primary key.
- */
-export async function findUserById(id: number): Promise<User | null> {
+export async function findUserById(id: string): Promise<User | null> {
   return prisma.user.findUnique({ where: { id } });
 }
 
 /**
  * Create a new user record.
  */
-export async function createUser(data: CreateUserInput): Promise<User> {
+export async function createUser(data: Prisma.UserCreateInput): Promise<User> {
   return prisma.user.create({ data });
 }
 
-/**
- * Update an existing user by ID.
- */
-export async function updateUser(
-  id: number,
-  data: UpdateUserInput
-): Promise<User> {
+
+export async function updateUser(id: string, data: UpdateUserInput) {
   try {
+    if (data.password && typeof data.password === 'string') {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
     return await prisma.user.update({ where: { id }, data });
   } catch (error) {
     if (
@@ -58,11 +48,7 @@ export async function updateUser(
     throw error;
   }
 }
-
-/**
- * Delete a user by ID.
- */
-export async function deleteUser(id: number): Promise<User> {
+export async function deleteUser(id: string): Promise<User> {
   try {
     return await prisma.user.delete({ where: { id } });
   } catch (error) {

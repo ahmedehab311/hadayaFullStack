@@ -6,11 +6,67 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  firstName String
-  lastName  String
-  userName  String
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  password  String?
+  name      String?
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int         @default(0)
+  imageUrl    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       OrderItem[]
+}
+
+model Order {
+  id               String      @id @default(uuid())
+  userId           String
+  total            Float
+  totalAmount      Float
+  status           OrderStatus @default(PENDING)
+  giftToken        String      @unique @default(uuid())
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  recipientName    String?
+  recipientPhone   String?
+  recipientAddress String?
+  isClaimed        Boolean     @default(false)
+
+  sender   User        @relation(fields: [userId], references: [id])
+  senderId String
+  items    OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  order     Order?  @relation(fields: [orderId], references: [id])
+  orderId   String?
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+  price     Float
 }
