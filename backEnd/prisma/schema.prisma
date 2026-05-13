@@ -13,10 +13,16 @@ enum Role {
 
 enum OrderStatus {
   PENDING
-  PAID
+  PROCESSING
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
 model User {
@@ -30,16 +36,48 @@ model User {
   orders    Order[]
 }
 
+model Collection {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  productId String?
+  products  Product[] @relation("ProductCollections")
+
+  @@index([slug])
+}
+
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  price       Float
-  stock       Int         @default(0)
-  imageUrl    String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  items       OrderItem[]
+  id            String  @id @default(uuid())
+  slug          String  @unique
+  // Multilingual fields
+  nameAr        String
+  nameEn        String
+  descriptionAr String? @db.Text
+  descriptionEn String? @db.Text
+
+  price          Decimal       @db.Decimal(10, 2)
+  compareAtPrice Decimal?      @db.Decimal(10, 2)
+  status         ProductStatus @default(DRAFT)
+  stock          Int           @default(0)
+
+  imageUrl String?
+  images   String[]
+
+  // Gift options
+  isPersonalizable   Boolean @default(false)
+  giftMessageEnabled Boolean @default(false)
+  attributes         Json?
+  isBestSeller       Boolean @default(false)
+
+  // SEO fields
+  metaTitle       String?
+  metaDescription String?
+  // Relations
+  items           OrderItem[]
+  collections     Collection[] @relation("ProductCollections")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order {
