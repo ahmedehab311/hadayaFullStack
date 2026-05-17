@@ -108,3 +108,4 @@ model OrderItem {
   quantity  Int
   price     Float
 }
+  
