@@ -11,7 +11,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 
     if (!email || !password || !name) throw new AppError('All fields are required', 400);
     const result = await authService.registerUser({ email, password, name });
-    sendSuccess(res, result, 'تم إنشاء الحساب بنجاح', 201);
+    sendSuccess(res, result, 'Account created successfully', 201);
   } catch (error) {
     next(error);
   }
@@ -25,7 +25,8 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     const result = await authService.tokenUser({ email, password });
 
-    sendSuccess(res, result, 'تم تسجيل الدخول بنجاح', 200);
+
+    sendSuccess(res, result, 'Logged in successfully', 200);
   } catch (error) {
     next(error);
   }
