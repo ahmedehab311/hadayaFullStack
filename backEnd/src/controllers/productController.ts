@@ -34,35 +34,61 @@ export async function getProductById(
     next(error);
   }
 }
-
 export async function createProduct(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const { name, description, price, stock, imageUrl } = req.body as {
-      name: string;
-      description?: string;
-      price: number;
-      stock?: number;
-      imageUrl?: string;
-    };
+    const {
+      slug,
+      nameAr,
+      nameEn,
+      descriptionAr,
+      descriptionEn,
+      price,
+      compareAtPrice,
+      status,
+      stock,
+      imageUrl,
+      images,
+      isPersonalizable,
+      giftMessageEnabled,
+      attributes,
+      isBestSeller,
+      metaTitle,
+      metaDescription,
+    } = req.body;
 
-    if (!name || price === undefined || price === null) {
-      throw new AppError('Product name and price are required', 400);
+    // التحقق من الحقول الإلزامية بناءً على السكيما الجديدة
+    if (!slug || !nameAr || !nameEn || price === undefined || price === null) {
+      throw new AppError('Slug, Arabic Name, English Name, and Price are required', 400);
     }
 
-    if (typeof price !== 'number' || price < 0) {
-      throw new AppError('Price must be a positive number', 400);
+    // التحقق من أن السعر رقم موجب (أو سترينج يمثل رقم)
+    const parsedPrice = Number(price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      throw new AppError('Price must be a valid positive number', 400);
     }
 
     const product = await productService.createProduct({
-      name,
-      description,
-      price,
+      slug,
+      nameAr,
+      nameEn,
+      descriptionAr,
+      descriptionEn,
+      price: parsedPrice,
+      compareAtPrice,
+      status,
       stock,
       imageUrl,
+      images,
+      isPersonalizable,
+      giftMessageEnabled,
+      attributes,
+      isBestSeller,
+      metaTitle,
+      metaDescription,
     });
 
     sendSuccess(res, product, 'Product created successfully', 201);
@@ -81,35 +107,21 @@ export async function updateProduct(
 
     if (!id) throw new AppError('Invalid product ID', 400);
 
-    const { name, description, price, stock, imageUrl } = req.body as {
-      name?: string;
-      description?: string;
-      price?: number;
-      stock?: number;
-      imageUrl?: string;
-    };
+    const body = req.body;
 
-    if (
-      name === undefined &&
-      description === undefined &&
-      price === undefined &&
-      stock === undefined &&
-      imageUrl === undefined
-    ) {
+    // التأكد من أن الـ Body مش فاضي
+    if (Object.keys(body).length === 0) {
       throw new AppError('At least one field is required for update', 400);
     }
 
-    if (price !== undefined && (typeof price !== 'number' || price < 0)) {
-      throw new AppError('Price must be a positive number', 400);
+    if (body.price !== undefined) {
+      const parsedPrice = Number(body.price);
+      if (isNaN(parsedPrice) || parsedPrice < 0) {
+        throw new AppError('Price must be a valid positive number', 400);
+      }
     }
 
-    const product = await productService.updateProduct(id, {
-      name,
-      description,
-      price,
-      stock,
-      imageUrl,
-    });
+    const product = await productService.updateProduct(id, body);
 
     sendSuccess(res, product, 'Product updated successfully');
   } catch (error) {

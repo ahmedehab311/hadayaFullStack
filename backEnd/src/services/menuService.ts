@@ -3,6 +3,13 @@ import { Prisma } from '@prisma/client';
 
 const menuQuery = {
     orderBy: { name: 'asc' },
+    where: {
+        products: {
+            some: {
+                status: 'PUBLISHED'
+            }
+        }
+    },
     include: {
         products: {
             where: { status: 'PUBLISHED' as const },

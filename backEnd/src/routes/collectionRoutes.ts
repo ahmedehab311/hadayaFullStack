@@ -16,7 +16,7 @@ router.get('/', getAllCollections);
 router.get('/:id', getCollectionById);
 router.get('/slug/:slug', getCollectionBySlug);
 router.post('/', authenticate, isAdmin, createCollection);
-router.put('/:id', authenticate, isAdmin, updateCollection);
+router.patch('/:id', authenticate, isAdmin, updateCollection);
 router.delete('/:id', authenticate, isAdmin, deleteCollection);
 
 export default router;

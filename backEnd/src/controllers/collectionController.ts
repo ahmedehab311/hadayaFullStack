@@ -57,9 +57,10 @@ export async function createCollection(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { name, slug } = req.body as {
+    const { name, slug , productIds } = req.body as {
       name: string;
       slug: string;
+      productIds?: string[];
     };
 
     if (!name || !slug) {
@@ -69,6 +70,7 @@ export async function createCollection(
     const collection = await collectionService.createCollection({
       name,
       slug,
+      productIds,
     });
 
     sendSuccess(res, collection, 'Collection created successfully', 201);
@@ -86,9 +88,10 @@ export async function updateCollection(
     const id = req.params['id'] as string;
     if (!id) throw new AppError('Invalid collection ID', 400);
 
-    const { name, slug } = req.body as {
+    const { name, slug, productIds } = req.body as {
       name?: string;
       slug?: string;
+      productIds?: string[];
     };
 
     if (name === undefined && slug === undefined) {
@@ -98,6 +101,7 @@ export async function updateCollection(
     const collection = await collectionService.updateCollection(id, {
       name,
       slug,
+      productIds,
     });
 
     sendSuccess(res, collection, 'Collection updated successfully');
