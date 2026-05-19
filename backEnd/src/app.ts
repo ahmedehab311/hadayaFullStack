@@ -5,6 +5,8 @@ import userRoutes from './routes/userRoutes';
 import { notFound } from './middlewares/notFound';
 import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
+import menuRoutes from './routes/menuroutes';
+import collectionRoutes from './routes/collectionroutes';
 import { apiLimiter } from './middlewares/rateLimiter';
 import { verifyApiKey } from './middlewares/apiKey';
 
@@ -16,12 +18,12 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization','api-key'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'api-key'],
   })
 );
 // ─── Rate Limiting (على كل الـ /api) 
 
-app.use('/api',apiLimiter);
+app.use('/api', apiLimiter);
 app.use('/api', verifyApiKey);
 // ─── Health Check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req: Request, res: Response) => {
@@ -37,6 +39,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/menu', menuRoutes);
 
 
 // ─── Error Handling ───────────────────────────────────────────────────────────

@@ -3,19 +3,6 @@ import * as collectionService from '../services/collectionService';
 import { sendSuccess } from '../utils/response';
 import { AppError } from '../utils/AppError';
 
-export async function getMenu(
-  _req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const menu = await collectionService.getMenu();
-    sendSuccess(res, menu, 'Menu retrieved successfully');
-  } catch (error) {
-    next(error);
-  }
-}
-
 export async function getAllCollections(
   _req: Request,
   res: Response,
@@ -39,6 +26,23 @@ export async function getCollectionById(
     if (!id) throw new AppError('Invalid collection ID', 400);
 
     const collection = await collectionService.findCollectionById(id);
+    if (!collection) throw new AppError('Collection not found', 404);
+
+    sendSuccess(res, collection, 'Collection retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+}
+export async function getCollectionBySlug(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const slug = req.params['slug'] as string;
+    if (!slug) throw new AppError('Invalid collection slug', 400);
+
+    const collection = await collectionService.findCollectionBySlug(slug);
     if (!collection) throw new AppError('Collection not found', 404);
 
     sendSuccess(res, collection, 'Collection retrieved successfully');
