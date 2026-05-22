@@ -5,8 +5,8 @@ import userRoutes from './routes/userRoutes';
 import { notFound } from './middlewares/notFound';
 import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
-import menuRoutes from './routes/menuroutes';
-import collectionRoutes from './routes/collectionroutes';
+import menuRoutes from './routes/menuRoutes';
+import collectionRoutes from './routes/collectionRoutes';
 import { apiLimiter } from './middlewares/rateLimiter';
 import { verifyApiKey } from './middlewares/apiKey';
 
