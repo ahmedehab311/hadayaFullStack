@@ -1,7 +1,6 @@
 import prisma from '../config/prismaClient';
 import { User, Prisma } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { AppError } from '../utils/AppError';
 export type CreateUserInput = {
 email: string;
 password: string;
