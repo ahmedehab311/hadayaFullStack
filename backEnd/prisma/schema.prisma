@@ -6,6 +6,22 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+enum SettingCategory {
+  GENERAL
+  FINANCIAL
+  GIFT
+  POLICY
+  SYSTEM
+  SEO
+}
+
 enum Role {
   USER
   ADMIN
@@ -23,6 +39,17 @@ enum ProductStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+model Setting {
+  id        String          @id @default(uuid())
+  key       String          @unique
+  value     String
+  type      SettingType     @default(STRING)
+  category  SettingCategory @default(GENERAL)
+  isPublic  Boolean         @default(true)
+  updatedAt DateTime        @updatedAt
+  createdAt DateTime        @default(now())
 }
 
 model User {
@@ -108,4 +135,3 @@ model OrderItem {
   quantity  Int
   price     Float
 }
-  

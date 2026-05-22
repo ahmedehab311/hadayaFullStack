@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
 import menuRoutes from './routes/menuRoutes';
 import collectionRoutes from './routes/collectionRoutes';
+import settingRoutes from './routes/settingRoutes';
 import { apiLimiter } from './middlewares/rateLimiter';
 import { verifyApiKey } from './middlewares/apiKey';
 
@@ -41,7 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/menu', menuRoutes);
-
+app.use('/api/settings', settingRoutes);
 
 // ─── Error Handling ───────────────────────────────────────────────────────────
 app.use(notFound);
