@@ -4,13 +4,12 @@ import * as authService from '../services/authService'
 import { sendSuccess } from "../utils/response";
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phone } = req.body;
 
 
     if (!email || !password || !name) throw new AppError('All fields are required', 400);
-    const result = await authService.registerUser({ email, password, name });
+    const result = await authService.registerUser({ email, password, name, phone   });
     sendSuccess(res, result, 'Account created successfully', 201);
   } catch (error) {
     next(error);

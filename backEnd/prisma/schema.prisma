@@ -44,7 +44,7 @@ enum DeliveryType {
 }
 
 enum PaymentMethod {
-  COD // عند الاستلام — SELF بس
+  COD // عند الاستلام — SELF بس   ,  Cash On Delivery
   CREDIT_CARD
   VODAFONE_CASH
   INSTAPAY
@@ -85,9 +85,10 @@ model Setting {
 
 model User {
   id        String    @id @default(uuid())
-  email     String?   @unique
-  password  String?
   name      String?
+  password  String?
+  phone     String?
+  email     String?   @unique
   role      Role      @default(USER)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
