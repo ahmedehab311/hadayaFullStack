@@ -49,7 +49,7 @@ async function resolveDeliveryFee(_zoneId?: string): Promise<number> {
     // return Number(zone?.fee ?? 0);
 }
 
-export async function createOrder(data: CreateOrderInput, buyerId: string) {
+export async function createOrder(buyerId: string, data: CreateOrderInput) {
     if (data.deliveryType === DeliveryType.SELF && !data.buyerAddressId) {
         throw new AppError('Buyer address is required for self-delivery orders', 400);
     }
@@ -160,7 +160,7 @@ export async function createOrder(data: CreateOrderInput, buyerId: string) {
                 status: order.status,
                 createdAt: new Date(),
                 changedBy: buyerId,
-                note: 'Order created'
+                notes: 'Order created'
             }
         })
         return tx.order.findUnique({
@@ -199,4 +199,98 @@ export async function findOrderById(id: string, buyerId: string) {
     });
     if (!order) throw new AppError('Order not found', 404);
     return order;
+}
+
+
+export async function addPaymentProof(
+    orderId: string,
+    buyerId: string,
+    imageUrl: string,
+    method: PaymentMethod
+) {
+    const order = await prisma.order.findFirst({
+        where: { id: orderId, buyerId },
+    });
+    if (!order) throw new AppError('Order not found', 404)
+    if (order.status !== OrderStatus.PENDING_PAYMENT) {
+        throw new AppError('Payment proof can only be added to orders pending payment', 409);
+    }
+
+    const manualMethods: PaymentMethod[] = [PaymentMethod.VODAFONE_CASH, PaymentMethod.INSTAPAY]
+
+    if (!manualMethods.includes(method)) {
+        throw new AppError('Invalid payment method', 400);
+    }
+
+
+    return prisma.$transaction(async (tx) => {
+        const proof = await tx.paymentProof.create({
+            data: { orderId, imageUrl, method }
+        })
+
+        await tx.order.update({
+            where: { id: orderId },
+            data: { status: OrderStatus.PENDING_VERIFICATION }
+        })
+        await tx.orderStatusHistory.create({
+            data: {
+                orderId,
+                status: OrderStatus.PENDING_VERIFICATION,
+                changedBy: buyerId,
+                notes: 'Payment proof added, pending verification',
+            },
+        });
+        return proof;
+    });
+}
+export async function cancelOrder(
+    id: string,
+    buyerId: string,
+
+) {
+    const order = await prisma.order.findFirst({
+        where: { id, buyerId },
+    });
+    if (!order) throw new AppError('Order not found', 404)
+
+
+    const cancellableStatuses: OrderStatus[] = [
+        OrderStatus.PENDING_PAYMENT,
+        OrderStatus.PENDING_VERIFICATION,
+    ];
+
+    if (!cancellableStatuses.includes(order.status)) {
+        throw new AppError('Order cannot be cancelled', 409);
+    }
+    return prisma.$transaction(async (tx) => {
+        const items = await tx.orderItem.findMany({ where: { orderId: id } });
+        for (const item of items) {
+            await tx.product.update({
+                where: { id: item.productId },
+                data: { stock: { increment: item.quantity } }
+            })
+        }
+
+        const updated = await tx.order.update({
+            where: { id },
+            data: {
+                status: OrderStatus.CANCELLED,
+                cancelledAt: new Date(),
+            },
+        });
+
+        await tx.orderStatusHistory.create({
+            data: {
+                orderId: id,
+                status: OrderStatus.CANCELLED,
+                changedBy: buyerId,
+                notes: "Order cancelled by buyer",
+            },
+        });
+
+        return updated;
+
+    })
+
+
 }

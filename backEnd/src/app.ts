@@ -8,9 +8,10 @@ import productRoutes from './routes/productRoutes';
 import menuRoutes from './routes/menuRoutes';
 import collectionRoutes from './routes/collectionRoutes';
 import settingRoutes from './routes/settingRoutes';
+import addressRoutes from './routes/addressRoutes';
+import orderRoutes from './routes/orderRoutes';
 import { apiLimiter } from './middlewares/rateLimiter';
 import { verifyApiKey } from './middlewares/apiKey';
-import addressRoutes from './routes/addressRoutes';
 const app: Application = express();
 // ─── Core Middleware ───────────────────────────────────────────────────────────
 app.use(express.json());
@@ -44,6 +45,7 @@ app.use('/api/collections', collectionRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/orders', orderRoutes);
 // ─── Error Handling ───────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
