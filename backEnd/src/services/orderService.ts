@@ -28,7 +28,7 @@ async function generateOrderNumber(): Promise<string> {
 
     const count = await prisma.order.count({
         where: {
-            createdAt: { gtr: startOfDay, lte: endOfDay }
+            createdAt: { gte: startOfDay, lte: endOfDay }
         }
     })
     const serial = String(count + 1).padStart(4, '0');
@@ -71,7 +71,7 @@ export async function createOrder(buyerId: string, data: CreateOrderInput) {
 
     for (const item of data.items) {
         const product = products.find((p) => p.id === item.productId)
-        if (product?.stock ?? 0 < item.quantity) {
+        if ((product?.stock ?? 0) < item.quantity) {
             throw new AppError(`Insufficient stock for product: ${product?.nameEn}`, 409);
         }
     }
