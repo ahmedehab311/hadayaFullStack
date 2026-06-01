@@ -1,0 +1,3 @@
+[submodule "frontEnd"]
+	path = frontEnd
+	url = https://github.com/ahmedehab311/Hadaya-front.git
