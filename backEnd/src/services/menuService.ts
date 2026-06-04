@@ -35,5 +35,14 @@ const menuQuery = {
 export type menuResult = Prisma.CollectionGetPayload<typeof menuQuery>
 
 export async function getMenu(): Promise<menuResult[]> {
-    return prisma.collection.findMany(menuQuery)
+    const collections = await prisma.collection.findMany(menuQuery);
+    
+    // إضافة computed property inStock لكل product بناءً على stock > 0
+    return collections.map(collection => ({
+        ...collection,
+        products: collection.products.map(product => ({
+            ...product,
+            inStock: product.stock > 0
+        }))
+    }));
 }
