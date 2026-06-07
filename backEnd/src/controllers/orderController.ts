@@ -2,8 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as orderService from '../services/orderService';
 import { sendSuccess } from '../utils/response';
 import { AppError } from '../utils/AppError';
-import { DeliveryType, PaymentMethod } from '@prisma/client';
-
+import { DeliveryType, PaymentMethod,OrderStatus, PaymentStatus  } from '@prisma/client';
 export async function createOrder(
     req: Request,
     res: Response,
@@ -136,4 +135,69 @@ export async function uploadPaymentProof(
     } catch (error) {
         next(error);
     }
+}
+export async function updateOrder(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = req.params['id'] as string;
+    if (!id) throw new AppError('Invalid order ID', 400);
+ 
+    const {
+      status,
+      paymentStatus,
+      transactionRef,
+      recipientName,
+      recipientPhone,
+      recipientEmail,
+      recipientAddressId,
+      notes,
+    } = req.body as {
+      status?: OrderStatus;
+      paymentStatus?: PaymentStatus;
+      transactionRef?: string;
+      recipientName?: string;
+      recipientPhone?: string;
+      recipientEmail?: string;
+      recipientAddressId?: string;
+      notes?: string;
+    };
+ 
+    // تأكد إن في حاجة بتتعدل على الأقل
+    const hasPayload = [
+      status, paymentStatus, transactionRef,
+      recipientName, recipientPhone, recipientEmail,
+      recipientAddressId,
+    ].some((v) => v !== undefined);
+ 
+    if (!hasPayload) {
+      throw new AppError('At least one field is required for update', 400);
+    }
+ 
+    // تحقق من صحة الـ enum values لو اتبعتوا
+    if (status && !Object.values(OrderStatus).includes(status)) {
+      throw new AppError(`Invalid status: ${status}`, 400);
+    }
+    if (paymentStatus && !Object.values(PaymentStatus).includes(paymentStatus)) {
+      throw new AppError(`Invalid paymentStatus: ${paymentStatus}`, 400);
+    }
+ 
+    const order = await orderService.updateOrder(id, {
+      status,
+      paymentStatus,
+      transactionRef,
+      recipientName,
+      recipientPhone,
+      recipientEmail,
+      recipientAddressId,
+      notes,
+      changedBy: req.user?.id ?? 'admin',
+    });
+ 
+    sendSuccess(res, order, 'Order updated successfully');
+  } catch (error) {
+    next(error);
+  }
 }

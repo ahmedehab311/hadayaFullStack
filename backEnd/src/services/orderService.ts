@@ -1,5 +1,5 @@
 import prisma from '../config/prismaClient';
-import { OrderStatus, DeliveryType, PaymentMethod, Prisma } from '@prisma/client';
+import { OrderStatus, DeliveryType, PaymentMethod, Prisma, PaymentStatus } from '@prisma/client';
 import { AppError } from '../utils/AppError';
 export type OrderItemInput = {
     productId: string;
@@ -293,4 +293,114 @@ export async function cancelOrder(
     })
 
 
+}
+
+export type UpdateOrderInput = {
+    status?: OrderStatus;
+    paymentStatus?: PaymentStatus;
+    transactionRef?: string;
+    recipientName?: string;
+    recipientPhone?: string;
+    recipientEmail?: string;
+    recipientAddressId?: string;
+    // للـ status history
+    notes?: string;
+    changedBy?: string;
+};
+
+export async function updateOrder(
+    id: string,
+    data: UpdateOrderInput
+) {
+    // 1. تحقق إن الأوردر موجود
+    const order = await prisma.order.findUnique({ where: { id } });
+    if (!order) throw new AppError('Order not found', 404);
+
+    // 2. افصل الـ status عن باقي الداتا عشان نتعامل معاه بشكل خاص
+    const { status, notes, changedBy, ...rest } = data;
+
+    // 3. تحقق من التحولات المنطقية للـ status
+    if (status) {
+        validateStatusTransition(order.status, status);
+    }
+
+    // 4. ابني الـ update payload
+    const updateData: Prisma.OrderUpdateInput = { ...rest };
+
+    if (status) {
+        updateData.status = status;
+
+        // سجّل timestamps بناءً على الـ status الجديد
+        const now = new Date();
+        if (status === OrderStatus.PAID) updateData.paidAt = now;
+        if (status === OrderStatus.SHIPPED) updateData.shippedAt = now;
+        if (status === OrderStatus.DELIVERED) updateData.deliveredAt = now;
+        if (status === OrderStatus.CANCELLED) updateData.cancelledAt = now;
+        if (status === OrderStatus.PENDING_VERIFICATION) updateData.verifiedAt = now;
+    }
+
+
+    if (status) {
+        return prisma.$transaction(async (tx) => {
+            const updated = await tx.order.update({
+                where: { id },
+                data: updateData,
+                include: {
+                    items: { include: { product: true } },
+                    buyerAddress: true,
+                    recipientAddress: true,
+                    giftToken: true,
+                    paymentProof: true,
+                    statusHistory: { orderBy: { createdAt: 'asc' } },
+                },
+            });
+
+            await tx.orderStatusHistory.create({
+                data: {
+                    orderId: id,
+                    status,
+                    notes: notes ?? null,
+                    changedBy: changedBy ?? 'admin',
+                },
+            });
+
+            return updated;
+        });
+    }
+
+
+    return prisma.order.update({
+        where: { id },
+        data: updateData,
+        include: {
+            items: { include: { product: true } },
+            buyerAddress: true,
+            recipientAddress: true,
+            giftToken: true,
+            paymentProof: true,
+            statusHistory: { orderBy: { createdAt: 'asc' } },
+        },
+    });
+}
+
+
+const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+    [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PENDING_VERIFICATION, OrderStatus.CANCELLED, OrderStatus.PAID],
+    [OrderStatus.PENDING_VERIFICATION]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+    [OrderStatus.PAID]: [OrderStatus.PROCESSING, OrderStatus.REFUNDED, OrderStatus.CANCELLED],
+    [OrderStatus.PROCESSING]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
+    [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+    [OrderStatus.DELIVERED]: [],
+    [OrderStatus.CANCELLED]: [],
+    [OrderStatus.REFUNDED]: [],
+};
+
+function validateStatusTransition(current: OrderStatus, next: OrderStatus) {
+    const allowed = VALID_TRANSITIONS[current];
+    if (!allowed.includes(next)) {
+        throw new AppError(
+            `Invalid status transition: ${current} → ${next}`,
+            409
+        );
+    }
 }

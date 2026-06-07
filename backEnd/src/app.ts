@@ -12,6 +12,7 @@ import addressRoutes from './routes/addressRoutes';
 import orderRoutes from './routes/orderRoutes';
 import { apiLimiter } from './middlewares/rateLimiter';
 import { verifyApiKey } from './middlewares/apiKey';
+import dashboardRoutes from './routes/dashboardRoutes';
 const app: Application = express();
 // ─── Core Middleware ───────────────────────────────────────────────────────────
 app.use(express.json());
@@ -46,6 +47,8 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/admin/dashboard', dashboardRoutes);
+
 // ─── Error Handling ───────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
