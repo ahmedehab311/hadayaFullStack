@@ -20,6 +20,7 @@ export type CreateProductInput = {
   isBestSeller?: boolean;
   metaTitle?: string;
   metaDescription?: string;
+  collectionIds?: string[];
 };
 
 export type UpdateProductInput = Partial<CreateProductInput>;
@@ -35,6 +36,7 @@ export async function findProductById(id: string): Promise<Product | null> {
 }
 
 export async function createProduct(data: CreateProductInput): Promise<Product> {
+  const { collectionIds, ...productData } = data;
   return prisma.product.create({
     data: {
       slug: data.slug,
@@ -54,7 +56,13 @@ export async function createProduct(data: CreateProductInput): Promise<Product> 
       isBestSeller: data.isBestSeller ?? false,
       metaTitle: data.metaTitle,
       metaDescription: data.metaDescription,
+      ...(collectionIds?.length && {
+        collections: {
+          connect: collectionIds.map((id) => ({ id })),
+        },
+      }),
     },
+    include: { collections: true },
   });
 }
 
@@ -62,10 +70,20 @@ export async function updateProduct(
   id: string,
   data: UpdateProductInput
 ): Promise<Product> {
+  const { collectionIds, ...productData } = data;
+
   try {
     return await prisma.product.update({
       where: { id },
-      data,
+      data: {
+        ...productData,
+        ...(collectionIds !== undefined && {
+          collections: {
+            set: collectionIds.map((cid) => ({ id: cid })),
+          },
+        }),
+      },
+      include: { collections: true },
     });
   } catch (error) {
     if (
