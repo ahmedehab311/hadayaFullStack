@@ -50,6 +50,11 @@ async function resolveDeliveryFee(_zoneId?: string): Promise<number> {
 }
 
 export async function createOrder(buyerId: string, data: CreateOrderInput) {
+    const buyer = await prisma.user.findUnique({ where: { id: buyerId } });
+    console.log("Buyer found:", buyer);
+    if (!buyer) {
+        throw new AppError('User not found', 404);
+    }
     if (data.deliveryType === DeliveryType.SELF && !data.buyerAddressId) {
         throw new AppError('Buyer address is required for self-delivery orders', 400);
     }
@@ -59,6 +64,7 @@ export async function createOrder(buyerId: string, data: CreateOrderInput) {
     if (data.paymentMethod === PaymentMethod.COD && data.deliveryType !== DeliveryType.SELF) {
         throw new AppError('Cash payment is only allowed for self-delivery orders', 400);
     }
+
     const productIds = data.items.map((i) => i.productId);
 
     const products = await prisma.product.findMany({

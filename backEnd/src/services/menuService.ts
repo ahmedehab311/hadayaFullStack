@@ -2,7 +2,8 @@ import prisma from '../config/prismaClient';
 import { Prisma } from '@prisma/client';
 
 const menuQuery = {
-    orderBy: { name: 'asc' },
+    orderBy: { nameEn: 'asc' },
+
     where: {
         products: {
             some: {
@@ -36,8 +37,6 @@ export type menuResult = Prisma.CollectionGetPayload<typeof menuQuery>
 
 export async function getMenu(): Promise<menuResult[]> {
     const collections = await prisma.collection.findMany(menuQuery);
-    
-    // إضافة computed property inStock لكل product بناءً على stock > 0
     return collections.map(collection => ({
         ...collection,
         products: collection.products.map(product => ({

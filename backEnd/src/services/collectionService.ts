@@ -3,7 +3,8 @@ import { Collection, Prisma } from '@prisma/client';
 import { AppError } from '../utils/AppError';
 
 export type CreateCollectionInput = {
-  name: string;
+  nameAr: string;
+  nameEn: string;
   slug: string;
   productIds?: string[];
 };
@@ -11,10 +12,9 @@ export type CreateCollectionInput = {
 
 export type UpdateCollectionInput = Partial<CreateCollectionInput>
 
-
 export async function findAllCollections(): Promise<Collection[]> {
   return prisma.collection.findMany({
-    orderBy: { name: 'asc' },
+    orderBy: { nameEn: 'asc' },
     include: { products: true }
   })
 }
@@ -25,7 +25,7 @@ export async function findCollectionById(id: string): Promise<Collection | null>
   })
 }
 export async function findCollectionBySlug(slug: string): Promise<Collection | null> {
-  return prisma.collection.findUnique({
+  return prisma.collection.findFirst({
     where: { slug },
     include: { products: true }
   })

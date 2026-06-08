@@ -1,5 +1,5 @@
 import prisma from '../config/prismaClient';
-import { User, Prisma } from '@prisma/client';
+import { User, Prisma, Role } from '@prisma/client';
 import bcrypt from 'bcrypt';
 export type CreateUserInput = {
 email: string;
@@ -23,9 +23,6 @@ export async function findUserById(id: string): Promise<User | null> {
   return prisma.user.findUnique({ where: { id } });
 }
 
-/**
- * Create a new user record.
- */
 export async function createUser(data: Prisma.UserCreateInput): Promise<User> {
   return prisma.user.create({ data });
 }
@@ -59,4 +56,10 @@ export async function deleteUser(id: string): Promise<User> {
     }
     throw error;
   }
+}
+export async function changeUserRole(id: string, role: Role): Promise<User> {
+  return prisma.user.update({
+    where: { id },
+    data: { role }
+  });
 }

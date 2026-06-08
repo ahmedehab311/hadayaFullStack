@@ -4,11 +4,13 @@ import prisma from '../config/prismaClient';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../middlewares/jwt';
 import { AppError } from '../utils/AppError';
+import { Role } from '@prisma/client';
 export type UserInput = {
   email: string;
   name: string;
   password: string;
   phone?: string;
+  role?: Role;
 };
 
 export type LoginInput = Pick<UserInput, 'email' | 'password'>;
@@ -18,8 +20,11 @@ export const registerUser = async (userData: UserInput) => {
   const hashedPassword = await bcrypt.hash(userData.password, 10);
   const user = await prisma.user.create({
     data: {
-      ...userData,
-      password: hashedPassword
+      email: userData.email,
+      name: userData.name,
+      phone: userData.phone,
+      password: hashedPassword,
+      role: userData.role || Role.USER,
     }
   });
 

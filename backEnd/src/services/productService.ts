@@ -34,28 +34,21 @@ export async function findAllProducts(): Promise<Product[]> {
 export async function findProductById(id: string): Promise<Product | null> {
   return prisma.product.findUnique({ where: { id } });
 }
-
+export async function findProductBySlug(slug: string): Promise<Product | null> {
+  return prisma.product.findFirst({ where: { slug },})
+}
 export async function createProduct(data: CreateProductInput): Promise<Product> {
   const { collectionIds, ...productData } = data;
   return prisma.product.create({
     data: {
-      slug: data.slug,
-      nameAr: data.nameAr,
-      nameEn: data.nameEn,
-      descriptionAr: data.descriptionAr,
-      descriptionEn: data.descriptionEn,
-      price: data.price,
-      compareAtPrice: data.compareAtPrice,
-      status: data.status ?? 'DRAFT',
-      stock: data.stock ?? 0,
-      imageUrl: data.imageUrl,
-      images: data.images ?? [],
-      isPersonalizable: data.isPersonalizable ?? false,
-      giftMessageEnabled: data.giftMessageEnabled ?? false,
-      attributes: data.attributes ?? Prisma.JsonNull,
-      isBestSeller: data.isBestSeller ?? false,
-      metaTitle: data.metaTitle,
-      metaDescription: data.metaDescription,
+      ...productData,
+      status: productData.status ?? 'DRAFT',
+      stock: productData.stock ?? 0,
+      images: productData.images ?? [],
+      isPersonalizable: productData.isPersonalizable ?? false,
+      giftMessageEnabled: productData.giftMessageEnabled ?? false,
+      attributes: productData.attributes ?? Prisma.JsonNull,
+      isBestSeller: productData.isBestSeller ?? false,
       ...(collectionIds?.length && {
         collections: {
           connect: collectionIds.map((id) => ({ id })),
@@ -98,6 +91,17 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string): Promise<Product> {
   try {
+    const linkedOrders = await prisma.orderItem.count({
+      where: { productId: id },
+    });
+
+    if (linkedOrders > 0) {
+      return await prisma.product.update({
+        where: { id },
+        data: { status: 'ARCHIVED' },
+      });
+    }
+
     return await prisma.product.delete({ where: { id } });
   } catch (error) {
     if (

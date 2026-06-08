@@ -57,18 +57,20 @@ export async function createCollection(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { name, slug , productIds } = req.body as {
-      name: string;
+    const { nameAr, nameEn, slug, productIds } = req.body as {
+      nameAr: string;
+      nameEn: string;
       slug: string;
       productIds?: string[];
     };
 
-    if (!name || !slug) {
+    if (!nameAr || !nameEn ||  !slug) {
       throw new AppError('Collection name and slug are required', 400);
     }
 
     const collection = await collectionService.createCollection({
-      name,
+      nameAr,
+      nameEn,
       slug,
       productIds,
     });
@@ -88,18 +90,20 @@ export async function updateCollection(
     const id = req.params['id'] as string;
     if (!id) throw new AppError('Invalid collection ID', 400);
 
-    const { name, slug, productIds } = req.body as {
-      name?: string;
+    const {   nameAr, nameEn, slug, productIds } = req.body as {
+      nameAr?: string;
+      nameEn?: string;
       slug?: string;
       productIds?: string[];
     };
 
-    if (name === undefined && slug === undefined) {
+    if (nameAr === undefined && nameEn === undefined && slug === undefined) {
       throw new AppError('At least one field is required for update', 400);
     }
 
     const collection = await collectionService.updateCollection(id, {
-      name,
+      nameAr,
+      nameEn,
       slug,
       productIds,
     });

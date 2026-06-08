@@ -76,9 +76,9 @@ CREATE TABLE "Address" (
 -- CreateTable
 CREATE TABLE "Collection" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "nameAr" TEXT NOT NULL,
+    "nameEn" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "productId" TEXT,
 
     CONSTRAINT "Collection_pkey" PRIMARY KEY ("id")
 );
