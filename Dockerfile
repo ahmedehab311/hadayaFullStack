@@ -21,4 +21,4 @@ EXPOSE 7860
 ENV PORT=7860
 ENV NODE_ENV=production
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "-e", "require('./dist/server.js')"]
