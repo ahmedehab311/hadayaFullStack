@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env file from project root
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 interface EnvConfig {
@@ -12,12 +11,12 @@ interface EnvConfig {
 
 function getEnvVar(key: string, defaultValue?: string): string {
   const value = process.env[key] ?? defaultValue;
-  if (value === undefined) {
-    throw new Error(`❌ Missing required environment variable: ${key}`);
+  if (value === undefined || value === '') {
+    console.error(`❌ Missing env variable: ${key}`);
+    process.exit(1); 
   }
   return value;
 }
-
 export const env: EnvConfig = {
   NODE_ENV: getEnvVar('NODE_ENV', 'development'),
   PORT: parseInt(getEnvVar('PORT', '3000'), 10),
