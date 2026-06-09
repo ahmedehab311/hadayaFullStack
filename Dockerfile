@@ -15,8 +15,10 @@ RUN npm run prisma:generate
 
 RUN npm run build
 
+RUN ls -la dist/
+
 EXPOSE 7860
 ENV PORT=7860
 ENV NODE_ENV=production
 
-CMD ["npm", "start"]
+CMD ["node", "dist/server.js"]
