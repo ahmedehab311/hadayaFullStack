@@ -39,15 +39,15 @@ app.get('/api/health', (_req: Request, res: Response) => {
 });
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/collections', collectionRoutes);
-app.use('/api/menu', menuRoutes);
-app.use('/api/settings', settingRoutes);
-app.use('/api/addresses', addressRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/admin/dashboard', dashboardRoutes);
+app.use('/users', userRoutes);
+app.use('/auth', authRoutes);
+app.use('/products', productRoutes);
+app.use('/collections', collectionRoutes);
+app.use('/menu', menuRoutes);
+app.use('/settings', settingRoutes);
+app.use('/addresses', addressRoutes);
+app.use('/orders', orderRoutes);
+app.use('/admin/dashboard', dashboardRoutes);
 
 // ─── Error Handling ───────────────────────────────────────────────────────────
 app.use(notFound);

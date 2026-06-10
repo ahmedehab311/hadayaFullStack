@@ -27,7 +27,11 @@ export async function findCollectionById(id: string): Promise<Collection | null>
 export async function findCollectionBySlug(slug: string): Promise<Collection | null> {
   return prisma.collection.findFirst({
     where: { slug },
-    include: { products: true }
+    include: {
+      products: {
+        where: { status: "PUBLISHED" }
+      }
+    }
   })
 }
 export async function createCollection(data: CreateCollectionInput): Promise<Collection> {

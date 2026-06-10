@@ -1,7 +1,5 @@
-// prisma.config.ts — Prisma v7 configuration
-// The datasource URL is managed here instead of in schema.prisma
 import "dotenv/config";
-import { defineConfig } from "prisma/config";
+import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -9,7 +7,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
- url: process.env['DIRECT_URL']
-
+    url: env("DIRECT_URL"), 
   },
 });
