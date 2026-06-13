@@ -18,6 +18,19 @@ export async function getAllSettings(
         next(error);
     }
 }
+export async function getPublicSettings(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> {
+    try {
+
+        const data = await settingService.getAllSettings(true);
+        sendSuccess(res, data, "settings retrieved successfully");
+    } catch (error) {
+        next(error);
+    }
+}
 export async function getSettingsByCategory(
     req: Request,
     res: Response,

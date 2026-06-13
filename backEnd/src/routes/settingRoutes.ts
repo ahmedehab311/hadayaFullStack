@@ -5,11 +5,14 @@ import {
     upsertSetting,
     bulkUpsertSettings,
     deleteSetting,
+    getPublicSettings
 } from '../controllers/settingController';
 import { authenticate } from '../middlewares/auth';
 import { isAdmin } from '../middlewares/isAdmin';
 
 const router = Router();
+
+router.get('/public', getPublicSettings);
 
 router.get('/', authenticate, getAllSettings);
 
